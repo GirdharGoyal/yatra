@@ -1,0 +1,66 @@
+[
+  {
+    "title": "Scuba Diving at Grande Island",
+    "city": "Goa",
+    "category": "Adventure",
+    "duration_hours": 4.0,
+    "price": 2500,
+    "slots_available": 15
+  },
+  {
+    "title": "Dudhsagar Falls Jeep Safari",
+    "city": "Goa",
+    "category": "Nature",
+    "duration_hours": 6.0,
+    "price": 1800,
+    "slots_available": 20
+  },
+  {
+    "title": "Mandovi Sunset River Cruise",
+    "city": "Goa",
+    "category": "Leisure",
+    "duration_hours": 2.0,
+    "price": 900,
+    "slots_available": 40
+  },
+  {
+    "title": "Elephanta Caves Ferry & Tour",
+    "city": "Mumbai",
+    "category": "Heritage",
+    "duration_hours": 4.5,
+    "price": 1200,
+    "slots_available": 25
+  },
+  {
+    "title": "South Mumbai Street Food Walk",
+    "city": "Mumbai",
+    "category": "Food",
+    "duration_hours": 3.0,
+    "price": 1100,
+    "slots_available": 15
+  },
+  {
+    "title": "Amer Fort Elephant & Heritage Tour",
+    "city": "Jaipur",
+    "category": "Heritage",
+    "duration_hours": 3.5,
+    "price": 1500,
+    "slots_available": 20
+  },
+  {
+    "title": "Chokhi Dhani Cultural Evening & Dinner",
+    "city": "Jaipur",
+    "category": "Food",
+    "duration_hours": 4.0,
+    "price": 1300,
+    "slots_available": 30
+  },
+  {
+    "title": "Old Delhi Heritage Rickshaw & Food Tour",
+    "city": "Delhi",
+    "category": "Food",
+    "duration_hours": 3.5,
+    "price": 1400,
+    "slots_available": 18
+  }
+]

@@ -1,0 +1,39 @@
+name: Yatra CI Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install email-validator
+
+      - name: Lint with Ruff
+        run: ruff check backend tests || true
+
+      - name: Run Pytest Suite
+        run: pytest
+
+      - name: Run RAG & Assistant Evals
+        run: |
+          python -m tests.eval_rag
+          python -m tests.eval_assistant
+
+      - name: Build Docker Image
+        run: docker build -t yatra-app:ci .

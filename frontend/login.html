@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Yatra</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav id="navbar"></nav>
+  <div class="container" style="max-width:440px;">
+    <div class="card">
+      <h2 id="form-title" style="margin-bottom:1rem;">Login to Yatra</h2>
+      <form id="auth-form" style="display:flex; flex-direction:column; gap:0.9rem;">
+        <input type="text" id="name" placeholder="Full Name" style="display:none;" />
+        <input type="email" id="email" placeholder="Email Address" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit" id="submit-btn">Login</button>
+      </form>
+      <p id="auth-msg" style="color:var(--danger); margin-top:0.8rem; font-size:0.9rem;"></p>
+      <p style="margin-top:1rem; font-size:0.9rem;">
+        <a href="#" id="toggle-mode">Don't have an account? Sign up</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let isSignup = false;
+    const toggle = document.getElementById("toggle-mode");
+    const nameInput = document.getElementById("name");
+    const title = document.getElementById("form-title");
+    const btn = document.getElementById("submit-btn");
+
+    toggle.onclick = (e) => {
+      e.preventDefault();
+      isSignup = !isSignup;
+      nameInput.style.display = isSignup ? "block" : "none";
+      title.textContent = isSignup ? "Create Account" : "Login to Yatra";
+      btn.textContent = isSignup ? "Sign Up" : "Login";
+      toggle.textContent = isSignup ? "Already have an account? Login" : "Don't have an account? Sign up";
+    };
+
+    document.getElementById("auth-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const name = nameInput.value;
+      const msg = document.getElementById("auth-msg");
+      msg.textContent = "";
+
+      try {
+        if (isSignup) {
+          await apiFetch("/auth/signup", {
+            method: "POST",
+            body: JSON.stringify({ name, email, password }),
+          });
+        }
+        const res = await apiFetch("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        });
+        setToken(res.access_token);
+        window.location.href = "search.html";
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>

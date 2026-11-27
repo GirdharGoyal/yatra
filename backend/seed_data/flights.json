@@ -1,0 +1,82 @@
+[
+  {
+    "airline": "IndiGo",
+    "flight_number": "6E-201",
+    "origin": "DEL",
+    "destination": "GOA",
+    "departure_time": "08:30",
+    "duration": "2h 35m",
+    "price": 4800,
+    "seats_available": 25
+  },
+  {
+    "airline": "Air India",
+    "flight_number": "AI-505",
+    "origin": "DEL",
+    "destination": "GOA",
+    "departure_time": "14:15",
+    "duration": "2h 40m",
+    "price": 5600,
+    "seats_available": 18
+  },
+  {
+    "airline": "Akasa Air",
+    "flight_number": "QP-112",
+    "origin": "BOM",
+    "destination": "GOA",
+    "departure_time": "10:00",
+    "duration": "1h 15m",
+    "price": 2900,
+    "seats_available": 30
+  },
+  {
+    "airline": "IndiGo",
+    "flight_number": "6E-410",
+    "origin": "DEL",
+    "destination": "BOM",
+    "departure_time": "07:00",
+    "duration": "2h 10m",
+    "price": 4200,
+    "seats_available": 22
+  },
+  {
+    "airline": "Vistara",
+    "flight_number": "UK-811",
+    "origin": "DEL",
+    "destination": "BLR",
+    "departure_time": "09:45",
+    "duration": "2h 50m",
+    "price": 5900,
+    "seats_available": 15
+  },
+  {
+    "airline": "IndiGo",
+    "flight_number": "6E-712",
+    "origin": "DEL",
+    "destination": "JAI",
+    "departure_time": "11:20",
+    "duration": "1h 05m",
+    "price": 2400,
+    "seats_available": 28
+  },
+  {
+    "airline": "SpiceJet",
+    "flight_number": "SG-144",
+    "origin": "BOM",
+    "destination": "JAI",
+    "departure_time": "16:40",
+    "duration": "1h 55m",
+    "price": 3700,
+    "seats_available": 20
+  },
+  {
+    "airline": "Air India",
+    "flight_number": "AI-633",
+    "origin": "BLR",
+    "destination": "GOA",
+    "departure_time": "13:10",
+    "duration": "1h 20m",
+    "price": 3100,
+    "seats_available": 24
+  }
+]

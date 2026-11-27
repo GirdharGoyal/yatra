@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Explore - Yatra</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav id="navbar"></nav>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('flights', this)">✈️ Flights</button>
+      <button class="tab-btn" onclick="switchTab('hotels', this)">🏨 Hotels</button>
+      <button class="tab-btn" onclick="switchTab('activities', this)">🎯 Activities</button>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <form id="search-form" class="search-bar">
+        <input type="text" id="q1" placeholder="From (e.g. DEL)" />
+        <input type="text" id="q2" placeholder="To (e.g. GOA)" />
+        <input type="date" id="travel-date" required />
+        <input type="number" id="travellers" value="1" min="1" max="10" placeholder="Travellers" />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <div id="results" class="grid"></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="chat.js"></script>
+  <script>
+    let currentType = "flights";
+    document.getElementById("travel-date").valueAsDate = new Date();
+
+    function switchTab(type, btn) {
+      currentType = type;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const q1 = document.getElementById("q1");
+      const q2 = document.getElementById("q2");
+      if (type === "flights") {
+        q1.placeholder = "From (e.g. DEL)";
+        q2.style.display = "block";
+      } else {
+        q1.placeholder = "City (e.g. Goa)";
+        q2.style.display = "none";
+      }
+      loadItems();
+    }
+
+    async function loadItems() {
+      const q1 = document.getElementById("q1").value.trim();
+      const q2 = document.getElementById("q2").value.trim();
+      const params = new URLSearchParams();
+      if (currentType === "flights") {
+        if (q1) params.append("origin", q1);
+        if (q2) params.append("destination", q2);
+      } else {
+        if (q1) params.append("city", q1);
+      }
+
+      const container = document.getElementById("results");
+      container.innerHTML = "<p>Loading...</p>";
+      try {
+        const items = await apiFetch(`/${currentType}?${params.toString()}`);
+        if (!items.length) {
+          container.innerHTML = "<p>No results found.</p>";
+          return;
+        }
+        container.innerHTML = items.map(item => `
+          <div class="card item-card">
+            <div>
+              <span class="badge">${currentType.toUpperCase()}</span>
+              <h3 style="margin-top:0.5rem;">${item.title || item.name || `${item.origin} → ${item.destination}`}</h3>
+              <p style="color:var(--muted); font-size:0.9rem;">
+                ${item.airline || item.city || ""} · Available: ${item.seats_available ?? item.rooms_available ?? item.slots_available ?? "Yes"}
+              </p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="price">₹${item.price}</span>
+              <button onclick="bookItem(${item.id})">Book Now</button>
+            </div>
+          </div>
+        `).join("");
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+      }
+    }
+
+    async function bookItem(itemId) {
+      if (!getToken()) {
+        alert("Please login first to book!");
+        window.location.href = "login.html";
+        return;
+      }
+      const date = document.getElementById("travel-date").value;
+      const travellers = parseInt(document.getElementById("travellers").value, 10);
+      try {
+        await apiFetch("/bookings", {
+          method: "POST",
+          headers: { "Idempotency-Key": `${Date.now()}-${itemId}` },
+          body: JSON.stringify({
+            item_type: currentType.slice(0, -1),
+            item_id: itemId,
+            travel_date: date,
+            travellers
+          }),
+        });
+        alert("Booking created! Redirecting to My Bookings for payment...");
+        window.location.href = "bookings.html";
+      } catch (err) {
+        alert(`Booking failed: ${err.message}`);
+      }
+    }
+
+    document.getElementById("search-form").onsubmit = (e) => {
+      e.preventDefault();
+      loadItems();
+    };
+    loadItems();
+  </script>
+</body>
+</html>

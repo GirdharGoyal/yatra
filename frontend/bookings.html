@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Bookings - Yatra</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav id="navbar"></nav>
+  <div class="container">
+    <h2 style="margin-bottom:1rem;">My Bookings</h2>
+    <div id="bookings-list" class="grid"></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="chat.js"></script>
+  <script>
+    async function loadBookings() {
+      if (!getToken()) {
+        window.location.href = "login.html";
+        return;
+      }
+      const list = document.getElementById("bookings-list");
+      try {
+        const bookings = await apiFetch("/bookings");
+        if (!bookings.length) {
+          list.innerHTML = "<p>No bookings yet. Go explore!</p>";
+          return;
+        }
+        list.innerHTML = bookings.map(b => `
+          <div class="card item-card">
+            <div>
+              <span class="badge ${b.status}">${b.status.toUpperCase()}</span>
+              <h3 style="margin-top:0.5rem;">Booking #${b.id} (${b.item_type})</h3>
+              <p style="color:var(--muted); font-size:0.9rem;">Date: ${b.travel_date} · Travellers: ${b.travellers}</p>
+              <p class="price" style="margin-top:0.4rem;">₹${b.amount}</p>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              ${b.status === "pending_payment" ? `<button class="btn-accent" onclick="payBooking(${b.id})">Pay Now</button>` : ""}
+              ${b.status === "confirmed" ? `<button class="btn-outline" onclick="viewReceipt(${b.id})">Receipt</button>` : ""}
+              ${b.status !== "cancelled" ? `<button class="btn-outline" onclick="editBooking(${b.id}, '${b.travel_date}',${b.travellers})">Edit</button>` : ""}
+              ${b.status !== "cancelled" ? `<button class="btn-danger" onclick="cancelBooking(${b.id})">Cancel</button>` : ""}
+            </div>
+          </div>
+        `).join("");
+      } catch (err) {
+        list.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+      }
+    }
+
+    async function editBooking(bookingId, currentDate, currentTravellers) {
+      const newDate = prompt("Enter new travel date (YYYY-MM-DD):", currentDate);
+      if (!newDate) return;
+      const newTravellersStr = prompt("Enter number of travellers (1-10):", String(currentTravellers));
+      if (!newTravellersStr) return;
+      const newTravellers = parseInt(newTravellersStr, 10);
+
+      try {
+        await apiFetch(`/bookings/${bookingId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ travel_date: newDate, travellers: newTravellers }),
+        });
+        alert("Booking updated!");
+        loadBookings();
+      } catch (err) {
+        alert(`Update failed: ${err.message}`);
+      }
+    }
+
+    async function payBooking(bookingId) {
+      const card = prompt("Enter 16-digit card number (use 4111111111111111 for success, 4000000000000002 to test failure):", "4111111111111111");
+      if (!card) return;
+      try {
+        await apiFetch(`/bookings/${bookingId}/pay`, {
+          method: "POST",
+          body: JSON.stringify({ card_number: card }),
+        });
+        alert("Payment successful!");
+        loadBookings();
+      } catch (err) {
+        alert(`Payment failed: ${err.message}`);
+      }
+    }
