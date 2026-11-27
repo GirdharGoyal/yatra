@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,7 +9,7 @@
   <nav id="navbar"></nav>
   <div class="container">
     <h2 style="margin-bottom:1rem;">My Bookings</h2>
-    <div id="bookings-list" class="grid"></div>
+    <div id="bookings-list" class="grid"><p>Loading bookings...</p></div>
   </div>
 
   <script src="app.js"></script>
@@ -23,28 +23,28 @@
       const list = document.getElementById("bookings-list");
       try {
         const bookings = await apiFetch("/bookings");
-        if (!bookings.length) {
-          list.innerHTML = "<p>No bookings yet. Go explore!</p>";
+        if (!bookings || !bookings.length) {
+          list.innerHTML = "<p>No bookings yet. <a href='search.html'>Go explore!</a></p>";
           return;
         }
         list.innerHTML = bookings.map(b => `
           <div class="card item-card">
             <div>
               <span class="badge ${b.status}">${b.status.toUpperCase()}</span>
-              <h3 style="margin-top:0.5rem;">Booking #${b.id} (${b.item_type})</h3>
+              <h3 style="margin-top:0.5rem;">Booking #${b.id} (${b.item_title || b.item_type})</h3>
               <p style="color:var(--muted); font-size:0.9rem;">Date: ${b.travel_date} · Travellers: ${b.travellers}</p>
               <p class="price" style="margin-top:0.4rem;">₹${b.amount}</p>
             </div>
             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
               ${b.status === "pending_payment" ? `<button class="btn-accent" onclick="payBooking(${b.id})">Pay Now</button>` : ""}
               ${b.status === "confirmed" ? `<button class="btn-outline" onclick="viewReceipt(${b.id})">Receipt</button>` : ""}
-              ${b.status !== "cancelled" ? `<button class="btn-outline" onclick="editBooking(${b.id}, '${b.travel_date}',${b.travellers})">Edit</button>` : ""}
+              ${b.status !== "cancelled" ? `<button class="btn-outline" onclick="editBooking(${b.id}, '${b.travel_date}', ${b.travellers})">Edit</button>` : ""}
               ${b.status !== "cancelled" ? `<button class="btn-danger" onclick="cancelBooking(${b.id})">Cancel</button>` : ""}
             </div>
           </div>
         `).join("");
       } catch (err) {
-        list.innerHTML = `<p style="color:var(--danger)">${err.message}</p>`;
+        list.innerHTML = `<p style="color:var(--danger)">Error: ${err.message}</p>`;
       }
     }
 
@@ -54,7 +54,6 @@
       const newTravellersStr = prompt("Enter number of travellers (1-10):", String(currentTravellers));
       if (!newTravellersStr) return;
       const newTravellers = parseInt(newTravellersStr, 10);
-
       try {
         await apiFetch(`/bookings/${bookingId}`, {
           method: "PATCH",
@@ -68,7 +67,7 @@
     }
 
     async function payBooking(bookingId) {
-      const card = prompt("Enter 16-digit card number (use 4111111111111111 for success, 4000000000000002 to test failure):", "4111111111111111");
+      const card = prompt("Enter 16-digit card number (use 4111111111111111 for success):", "4111111111111111");
       if (!card) return;
       try {
         await apiFetch(`/bookings/${bookingId}/pay`, {
@@ -81,3 +80,34 @@
         alert(`Payment failed: ${err.message}`);
       }
     }
+
+    async function cancelBooking(bookingId) {
+      if (!confirm("Are you sure you want to cancel this booking?")) return;
+      try {
+        await apiFetch(`/bookings/${bookingId}/cancel`, { method: "POST" });
+        alert("Booking cancelled!");
+        loadBookings();
+      } catch (err) {
+        alert(`Cancel failed: ${err.message}`);
+      }
+    }
+
+    async function viewReceipt(bookingId) {
+      try {
+        const res = await fetch(`${API_BASE}/bookings/${bookingId}/receipt`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        if (!res.ok) throw new Error("Failed to load receipt");
+        const html = await res.text();
+        const win = window.open("", "_blank");
+        win.document.write(html);
+        win.document.close();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    loadBookings();
+  </script>
+</body>
+</html>
